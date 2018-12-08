@@ -80,3 +80,24 @@ def pack_raw(raw):
                           im[1:H:2, 1:W:2, :],
                           im[1:H:2, 0:W:2, :]), axis=2)
     return out
+
+def pack_raw_matrix(mat):
+    # pack Bayer matrix to 4 channels
+    mat = np.maximum(mat - 512, 0) / (16383 - 512)  # subtract the black level
+
+    mat = np.expand_dims(mat, axis=2)
+    img_shape = mat.shape
+    H = img_shape[0]
+    W = img_shape[1]
+
+    out = np.concatenate((mat[0:H:2, 0:W:2, :],
+                          mat[0:H:2, 1:W:2, :],
+                          mat[1:H:2, 1:W:2, :],
+                          mat[1:H:2, 0:W:2, :]), axis=2)
+    return out
+
+def dark_model_var_dict(var_lst):
+    '''
+    Get the var_dict to restore the pretrain weight of the dark model
+    '''
+    return dict(map(lambda a: (a.name.split('DARK')[1][1:].split(':')[0], a), var_lst))
